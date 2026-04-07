@@ -1,0 +1,166 @@
+package com.example.opharma.ui.screen
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileScreen(onNavigateBack: () -> Unit) {
+    var isEditing by remember { mutableStateOf(false) }
+
+    var firstName by remember { mutableStateOf("Никита") }
+    var lastName by remember { mutableStateOf("Гаврилов") }
+    var phone by remember { mutableStateOf("+7 (999) 123-45-67") }
+    var age by remember { mutableStateOf("30") }
+    var allergies by remember { mutableStateOf("Пенициллин, Арахис") }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Профиль", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        if (isEditing) {
+                            // TODO: Сохранить в БД/SharedPreferences
+                            println("Сохранено: $firstName $lastName")
+                        }
+                        isEditing = !isEditing
+                    }) {
+                        Icon(
+                            imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                            contentDescription = if (isEditing) "Сохранить" else "Редактировать"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Фото профиля (заглушка)
+            Card(
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "НГ",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            // Поля профиля
+            ProfileField(
+                label = "Имя",
+                value = firstName,
+                isEditable = isEditing,
+                onValueChange = { firstName = it },
+                icon = Icons.Default.Edit
+            )
+
+            ProfileField(
+                label = "Фамилия",
+                value = lastName,
+                isEditable = isEditing,
+                onValueChange = { lastName = it }
+            )
+
+            ProfileField(
+                label = "Телефон",
+                value = phone,
+                isEditable = isEditing,
+                onValueChange = { phone = it },
+                icon = Icons.Default.Phone
+            )
+
+            ProfileField(
+                label = "Возраст",
+                value = age,
+                isEditable = isEditing,
+                onValueChange = { age = it },
+                icon = Icons.Default.Person
+            )
+
+            ProfileField(
+                label = "Аллергии",
+                value = allergies,
+                isEditable = isEditing,
+                onValueChange = { allergies = it },
+                maxLines = 3
+            )
+
+            // Кнопка выхода (пока заглушка)
+            Button(
+                onClick = { /* TODO: logout() */ },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Выйти")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileField(
+    label: String,
+    value: String,
+    isEditable: Boolean,
+    onValueChange: (String) -> Unit,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    maxLines: Int = 1
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            label = { Text(label) },
+            leadingIcon = icon?.let {
+                {
+                    Icon(it, contentDescription = label)
+                }
+            },
+            enabled = isEditable,
+            readOnly = !isEditable,
+            maxLines = maxLines,
+            singleLine = maxLines == 1
+        )
+    }
+}
