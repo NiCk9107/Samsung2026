@@ -24,7 +24,6 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-// ВАЖНО: Укажите где лежат исходники
 sourceSets {
     main {
         kotlin.srcDirs("src/main/kotlin")
