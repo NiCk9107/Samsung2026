@@ -20,6 +20,11 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm:3.0.1")
     implementation("ch.qos.logback:logback-classic:1.5.6")
 
+    implementation("org.jetbrains.exposed:exposed-core:0.47.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.47.0")
+    implementation("org.postgresql:postgresql:42.7.3")
+
+
     testImplementation("io.ktor:ktor-server-test-host-jvm:3.0.1")
     testImplementation(kotlin("test"))
 }
