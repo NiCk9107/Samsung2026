@@ -1,4 +1,6 @@
+import features.compatibility.configureCompatibilityRouting
 import features.login.configureLoginRouting
+import features.medicines.configureMedicineRouting
 import features.register.configureRegisterRouting
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
@@ -13,6 +15,8 @@ fun main() {
         configureSerialization()
         configureLoginRouting()
         configureRegisterRouting()
+        configureMedicineRouting()
+        configureCompatibilityRouting()
         configureRouting()
     }.start(wait = true)
 }
