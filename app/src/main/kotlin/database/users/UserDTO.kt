@@ -1,8 +1,15 @@
-package database.users;
+package database.users
 
-class UserDTO (
-    val login: String,
-    val password: String,
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class UserDTO(
+    val id: Int,
+    val firstName: String? = null,
+    val lastName: String? = null,
     val email: String,
-    val username: String
+    val password: String,
+    val phone: String? = null,
+    val age: Int? = null,
+    val allergies: String? = null
 )

@@ -30,7 +30,6 @@ class LoginController(private val call: ApplicationCall) {
 
             TokenModel.insert(
                 TokenDTO(
-                    rowId = UUID.randomUUID().toString(),
                     login = receive.login,
                     token = token
                 )

@@ -1,7 +1,10 @@
-package database.tokens;
+package database.tokens
 
-class TokenDTO (
-    val rowId: String,
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class TokenDTO(
+    val id: Int = 0,
     val login: String,
     val token: String
 )

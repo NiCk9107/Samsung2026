@@ -1,21 +1,19 @@
 package database.tokens
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object TokenModel: Table("tokens") {
-    private val id = TokenModel.varchar("id",50)
-    private val login = TokenModel.varchar("login", 50)
-    private val token = TokenModel.varchar("token", 75)
+object TokenModel : Table("tokens") {
+    val id = integer("id").autoIncrement()
+    val login = varchar("login", 255)
+    val token = varchar("token", 255)
 
-    fun insert(tokenDTO: TokenDTO){
-        transaction {
-            TokenModel.insert {
-                it[id] = tokenDTO.rowId
-                it[login] = tokenDTO.login
-                it[token] = tokenDTO.token
-            }
+    override val primaryKey = PrimaryKey(id)
+
+    fun insert(tokenDTO: TokenDTO) {
+        TokenModel.insert {
+            it[login] = tokenDTO.login
+            it[token] = tokenDTO.token
         }
     }
 }
