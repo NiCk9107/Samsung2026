@@ -1,26 +1,24 @@
-package com.example.opharma.data.model
+package com.example.Opharma.data.model
 
-data class Tablet(
-    val id: Int,
-    val name: String,
-    val description: String,
-    val compatibility: List<CompatibilityInfo>
-)
+import kotlinx.serialization.Serializable
 
-data class CompatibilityInfo(
-    val title: String,
-    val status: CompatibilityStatus,
-    val description: String
-)
+object MedicineModels {
+    @Serializable
+    data class Medicine(
+        val id: Int,
+        val name: String,
+        val description: String? = null,
+        val foodCompatibility: String? = null,
+        val alcoholCompatibility: String? = null
+    )
 
-enum class CompatibilityStatus {
-    COMPATIBLE,
-    INCOMPATIBLE,
-    CAUTION
+    @Serializable
+    data class Compatibility(
+        val id: Int,
+        val medicineId: Int,
+        val type: String,
+        val itemName: String,
+        val compatibilityStatus: String,
+        val recommendation: String? = null
+    )
 }
-
-data class Category(
-    val id: Int,
-    val name: String,
-    val icon: Int? = null
-)

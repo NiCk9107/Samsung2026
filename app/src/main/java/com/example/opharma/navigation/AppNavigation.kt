@@ -1,21 +1,26 @@
-package com.example.opharma.navigation
+package com.example.pharma.navigation
 
 import android.content.Context
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.opharma.ui.screens.*
+import com.example.opharma.ui.screens.CompareScreen
+import com.example.opharma.ui.screens.DrinkDetailScreen
+import com.example.opharma.ui.screens.FoodDetailScreen
+import com.example.opharma.ui.screens.LoginScreen
+import com.example.opharma.ui.screens.MainTabScreen
+import com.example.opharma.ui.screens.OtherMedsDetailScreen
+import com.example.opharma.ui.screens.ProfileScreen
+import com.example.opharma.ui.screens.RegisterScreen
+import com.example.opharma.ui.screens.TabletDetailScreen
 import com.example.opharma.viewModel.MedicineViewModel
+import com.example.pharma.ui.screens.*
+
 
 private const val PREFS_NAME = "app_prefs"
-private const val KEY_FIRST_LAUNCH = "first_launch"
 private const val KEY_AUTH_TOKEN = "auth_token"
 
 @Composable
@@ -23,255 +28,97 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val medicineViewModel: MedicineViewModel = viewModel()
     val context = LocalContext.current
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
-    val startDestination by remember {
-        mutableStateOf(
-            when {
-                !hasAuthToken(context) -> Screen.Login.route
-                isFirstLaunch(context) -> Screen.Onboarding.route
-                else -> Screen.Home.route
-            }
-        )
-    }
+    val startDestination = if (hasAuthToken(context)) "home" else "login"
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        // LOGIN
-        composable(
-            route = Screen.Login.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
+    NavHost(navController = navController, startDestination = startDestination) {
+
+        composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    saveAuthToken(context, "user_token_${System.currentTimeMillis()}")
-                    if (isFirstLaunch(context)) {
-                        navController.navigate(Screen.Onboarding.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    } else {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
+                    saveAuthToken(context, "token")
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
                     }
                 },
-                onRegisterClick = { navController.navigate(Screen.Register.route) }
+                onRegisterClick = { navController.navigate("register") }
             )
         }
 
-        // REGISTER
-        composable(
-            route = Screen.Register.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
+        composable("register") {
             RegisterScreen(
                 onRegisterSuccess = {
-                    saveAuthToken(context, "user_token_${System.currentTimeMillis()}")
-                    if (isFirstLaunch(context)) {
-                        navController.navigate(Screen.Onboarding.route) {
-                            popUpTo(Screen.Register.route) { inclusive = true }
-                        }
-                    } else {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Register.route) { inclusive = true }
-                        }
+                    saveAuthToken(context, "token")
+                    navController.navigate("home") {
+                        popUpTo("register") { inclusive = true }
                     }
                 },
                 onBack = { navController.popBackStack() }
             )
         }
 
-        // ONBOARDING
-        composable(
-            route = Screen.Onboarding.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            OnboardingScreen(
-                onFinish = {
-                    setOnboardingShown(context)
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+        composable("home") {
+            MainTabScreen(
+                viewModel = medicineViewModel,
+                navToResult = { id -> navController.navigate("result/$id") },
+                navToTabletDetail = { id -> navController.navigate("detail/$id") },
+                onProfileClick = { navController.navigate("profile") }
+            )
+        }
+
+        composable("detail/{medicineId}") { entry ->
+            val id = entry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
+            TabletDetailScreen(
+                viewModel = medicineViewModel,
+                medicineId = id,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToFoodDetail = { navController.navigate("food/$id") },
+                onNavigateToDrinkDetail = { navController.navigate("drink/$id") },
+                onNavigateToOtherMedsDetail = { navController.navigate("othermeds/$id") }
+            )
+        }
+
+        composable("food/{medicineId}") { entry ->
+            val id = entry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
+            FoodDetailScreen(viewModel = medicineViewModel, medicineId = id, onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("drink/{medicineId}") { entry ->
+            val id = entry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
+            DrinkDetailScreen(viewModel = medicineViewModel, medicineId = id, onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("othermeds/{medicineId}") { entry ->
+            val id = entry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
+            OtherMedsDetailScreen(viewModel = medicineViewModel, medicineId = id, onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable("result/{medicineId}") { entry ->
+            val id = entry.arguments?.getString("medicineId")?.toIntOrNull() ?: 0
+            CompareScreen(viewModel = medicineViewModel, medicineId = id, onNavigateBack = { navController.popBackStack() })
+        }
+        composable("profile") {
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLogout = {
+                    clearAuthToken(context)
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
-
-        // HOME
-        composable(
-            route = Screen.Home.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            MainTabScreen(
-                viewModel = medicineViewModel,
-                navToResult = { navController.navigate(Screen.Result.route) },
-                navToTabletDetail = { navController.navigate(Screen.Detail.route) },
-                onProfileClick = { navController.navigate(Screen.Profile.route) }
-            )
-        }
-
-        // DETAIL
-        composable(
-            route = Screen.Detail.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            TabletDetailScreen(
-                viewModel = medicineViewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToFoodDetail = { navController.navigate(Screen.FoodDetail.route) },
-                onNavigateToDrinkDetail = { navController.navigate(Screen.DrinkDetail.route) },
-                onNavigateToOtherMedsDetail = { navController.navigate(Screen.OtherMedsDetail.route) }
-            )
-        }
-
-        composable(
-            route = Screen.FoodDetail.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            FoodDetailScreen(onNavigateBack = { navController.popBackStack() })
-        }
-
-        composable(
-            route = Screen.DrinkDetail.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            DrinkDetailScreen(onNavigateBack = { navController.popBackStack() })
-        }
-
-        composable(
-            route = Screen.OtherMedsDetail.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            OtherMedsDetailScreen(onNavigateBack = { navController.popBackStack() })
-        }
-
-        composable(
-            route = Screen.Result.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            ResultScreen(
-                viewModel = medicineViewModel,
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        composable(
-            route = Screen.Profile.route,
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start
-                ) + fadeIn()
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End
-                ) + fadeOut()
-            }
-        ) {
-            ProfileScreen(onNavigateBack = { navController.popBackStack() })
-        }
     }
 }
 
-// SharedPreferences остаются без изменений
 fun hasAuthToken(context: Context): Boolean {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    return prefs.contains(KEY_AUTH_TOKEN)
+    return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).contains(KEY_AUTH_TOKEN)
 }
 
 fun saveAuthToken(context: Context, token: String) {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putString(KEY_AUTH_TOKEN, token).apply()
 }
 
-fun isFirstLaunch(context: Context): Boolean {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    return prefs.getBoolean(KEY_FIRST_LAUNCH, true)
-}
-
-fun setOnboardingShown(context: Context) {
-    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply()
+fun clearAuthToken(context: Context) {
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().remove(KEY_AUTH_TOKEN).apply()
 }
