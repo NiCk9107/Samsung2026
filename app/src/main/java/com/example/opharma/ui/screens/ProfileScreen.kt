@@ -1,9 +1,10 @@
-package com.example.opharma.ui.screen
+package com.example.opharma.ui.screens
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,16 +12,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onNavigateBack: () -> Unit) {
+fun ProfileScreen(
+    onNavigateBack: () -> Unit,
+    onLogout: () -> Unit = {}
+) {
     var isEditing by remember { mutableStateOf(false) }
 
     var firstName by remember { mutableStateOf("Никита") }
@@ -41,8 +44,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit) {
                 actions = {
                     IconButton(onClick = {
                         if (isEditing) {
-                            // TODO: Сохранить в БД/SharedPreferences
-                            println("Сохранено: $firstName $lastName")
+                            // TODO: Сохранить на бэкенд
                         }
                         isEditing = !isEditing
                     }) {
@@ -63,7 +65,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Фото профиля (заглушка)
+            // Аватар
             Card(
                 modifier = Modifier
                     .size(100.dp)
@@ -74,56 +76,23 @@ fun ProfileScreen(onNavigateBack: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "НГ",
+                        text = "${firstName.firstOrNull() ?: ""}${lastName.firstOrNull() ?: ""}",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Поля профиля
-            ProfileField(
-                label = "Имя",
-                value = firstName,
-                isEditable = isEditing,
-                onValueChange = { firstName = it },
-                icon = Icons.Default.Edit
-            )
+            ProfileField("Имя", firstName, isEditing, { firstName = it }, Icons.Default.Person)
+            ProfileField("Фамилия", lastName, isEditing, { lastName = it })
+            ProfileField("Телефон", phone, isEditing, { phone = it }, Icons.Default.Phone)
+            ProfileField("Возраст", age, isEditing, { age = it }, Icons.Default.Person)
+            ProfileField("Аллергии", allergies, isEditing, { allergies = it }, maxLines = 3)
 
-            ProfileField(
-                label = "Фамилия",
-                value = lastName,
-                isEditable = isEditing,
-                onValueChange = { lastName = it }
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            ProfileField(
-                label = "Телефон",
-                value = phone,
-                isEditable = isEditing,
-                onValueChange = { phone = it },
-                icon = Icons.Default.Phone
-            )
-
-            ProfileField(
-                label = "Возраст",
-                value = age,
-                isEditable = isEditing,
-                onValueChange = { age = it },
-                icon = Icons.Default.Person
-            )
-
-            ProfileField(
-                label = "Аллергии",
-                value = allergies,
-                isEditable = isEditing,
-                onValueChange = { allergies = it },
-                maxLines = 3
-            )
-
-            // Кнопка выхода (пока заглушка)
             Button(
-                onClick = { /* TODO: logout() */ },
+                onClick = onLogout,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
@@ -132,35 +101,24 @@ fun ProfileScreen(onNavigateBack: () -> Unit) {
         }
     }
 }
-
 @Composable
 private fun ProfileField(
     label: String,
     value: String,
     isEditable: Boolean,
     onValueChange: (String) -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    icon: ImageVector? = null,
     maxLines: Int = 1
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            label = { Text(label) },
-            leadingIcon = icon?.let {
-                {
-                    Icon(it, contentDescription = label)
-                }
-            },
-            enabled = isEditable,
-            readOnly = !isEditable,
-            maxLines = maxLines,
-            singleLine = maxLines == 1
-        )
-    }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(label) },
+        leadingIcon = icon?.let { { Icon(it, contentDescription = label) } },
+        enabled = isEditable,
+        readOnly = !isEditable,
+        maxLines = maxLines,
+        singleLine = maxLines == 1
+    )
 }

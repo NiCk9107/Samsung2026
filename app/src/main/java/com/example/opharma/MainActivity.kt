@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.opharma.ui.theme.OpharmaTheme
 import com.example.opharma.viewModel.MedicineViewModel
-import com.example.pharma.navigation.AppNavigation
+import com.example.opharma.navigation.AppNavigation
 
 
 

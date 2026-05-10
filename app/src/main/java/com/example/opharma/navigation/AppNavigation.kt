@@ -1,4 +1,4 @@
-package com.example.pharma.navigation
+package com.example.opharma.navigation
 
 import android.content.Context
 import androidx.compose.runtime.*
@@ -17,7 +17,6 @@ import com.example.opharma.ui.screens.ProfileScreen
 import com.example.opharma.ui.screens.RegisterScreen
 import com.example.opharma.ui.screens.TabletDetailScreen
 import com.example.opharma.viewModel.MedicineViewModel
-import com.example.pharma.ui.screens.*
 
 
 private const val PREFS_NAME = "app_prefs"

@@ -1,4 +1,4 @@
-package com.example.opharma.ui.screen
+package com.example.opharma.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.opharma.viewModel.MedicineViewModel
+import com.example.pharma.ui.screens.FavoritesScreen
+
 
 enum class BottomTab {
     HOME, FAVORITES, COMPARE
@@ -19,8 +21,8 @@ enum class BottomTab {
 @Composable
 fun MainTabScreen(
     viewModel: MedicineViewModel,
-    navToResult: () -> Unit,
-    navToTabletDetail: () -> Unit,
+    navToResult: (Int) -> Unit,
+    navToTabletDetail: (Int) -> Unit,
     onProfileClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
@@ -57,8 +59,8 @@ fun MainTabScreen(
                     navToTabletDetail = navToTabletDetail,
                     onProfileClick = onProfileClick
                 )
-                BottomTab.FAVORITES -> FavoritesScreen(viewModel)
-                BottomTab.COMPARE -> CompareScreen(viewModel)
+                BottomTab.FAVORITES -> FavoritesScreen(viewModel = viewModel)
+                BottomTab.COMPARE -> CompareScreen(viewModel = viewModel)
             }
         }
     }
